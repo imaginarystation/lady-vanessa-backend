@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5000;
 
 const sequelize = require('./config/dbConfig');
 
-sequelize.sync({ force: true }) // Use `force: true` only for development
+sequelize.sync({ force: false }) // Use `force: true` only for development
     .then(() => {
         console.log('Database synced successfully!');
     })

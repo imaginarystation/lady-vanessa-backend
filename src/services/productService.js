@@ -24,7 +24,7 @@ class ProductService {
 
     async getAllProducts() {
         try {
-            return await Product.find();
+            return await Product.findAll();
         } catch (error) {
             throw new Error('Error fetching products: ' + error.message);
         }

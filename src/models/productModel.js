@@ -10,6 +10,10 @@ const Product = sequelize.define('Product', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
+    category: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     price: {
         type: DataTypes.FLOAT,
         allowNull: false,
