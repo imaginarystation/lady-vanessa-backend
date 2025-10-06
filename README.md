@@ -51,6 +51,76 @@ npm start
 npm run dev
 ```
 
+## Docker Deployment
+
+The application can be easily deployed using Docker and Docker Compose.
+
+### Prerequisites for Docker
+
+- Docker Engine (v20.10 or higher)
+- Docker Compose (v2.0 or higher)
+
+### Using Docker Compose (Recommended)
+
+The easiest way to run the application with all dependencies:
+
+```bash
+# Build and start all services (backend + PostgreSQL)
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop all services
+docker compose down
+
+# Stop and remove volumes (removes all data)
+docker compose down -v
+```
+
+The application will be available at `http://localhost:5000`
+
+### Using Dockerfile Only
+
+If you have your own database setup:
+
+```bash
+# Build the Docker image
+docker build -t lady-vanessa-backend .
+
+# Run the container
+docker run -d \
+  -p 5000:5000 \
+  -e DB_URL=postgresql://user:password@host:5432/dbname \
+  -e JWT_SECRET=your-secret-key \
+  -e NODE_ENV=production \
+  --name lady-vanessa-backend \
+  lady-vanessa-backend
+
+# View logs
+docker logs -f lady-vanessa-backend
+
+# Stop the container
+docker stop lady-vanessa-backend
+```
+
+### Environment Variables for Docker
+
+When using Docker, you can set environment variables in `docker-compose.yml` or pass them using `-e` flag with `docker run`. Required variables:
+
+- `DB_URL` - PostgreSQL connection string
+- `PORT` - Server port (default: 5000)
+- `JWT_SECRET` - Secret key for JWT tokens
+- `NODE_ENV` - Environment (production/development)
+
+### Docker Image Details
+
+- **Base Image**: Node.js 18 Alpine
+- **Image Size**: ~128MB (optimized multi-stage build)
+- **User**: Non-root user (nodejs) for security
+- **Exposed Port**: 5000
+
+
 ## API Endpoints
 
 ### Users

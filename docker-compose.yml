@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: lady-vanessa-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lady_vanessa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lady-vanessa-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      DB_URL: postgresql://postgres:postgres@postgres:5432/lady_vanessa
+      PORT: 5000
+      JWT_SECRET: your-secret-key-here-change-in-production
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # For development, uncomment the following to use nodemon
+    # command: npm run dev
+    # volumes:
+    #   - ./src:/app/src
+
+volumes:
+  postgres_data:
