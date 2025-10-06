@@ -4,12 +4,14 @@ class OrderItemService {
     // Add items to an existing order
     async addItemsToOrder(orderId, items) {
         try {
-            const orderItems = items.map(item => ({
+            // Handle both single item and array of items
+            const itemsArray = Array.isArray(items) ? items : [items];
+            const orderItems = itemsArray.map(item => ({
                 ...item,
                 orderId,
             }));
-            await OrderItem.bulkCreate(orderItems);
-            return orderItems;
+            const createdItems = await OrderItem.bulkCreate(orderItems);
+            return createdItems;
         } catch (error) {
             throw new Error('Error adding items to order: ' + error.message);
         }
