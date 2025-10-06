@@ -3,8 +3,8 @@ const Product = require('../models/productModel');
 class ProductService {
     async createProduct(data) {
         try {
-            const product = new Product(data);
-            return await product.save();
+            const product = await Product.create(data);
+            return product;
         } catch (error) {
             throw new Error('Error creating product: ' + error.message);
         }
@@ -12,7 +12,7 @@ class ProductService {
 
     async getProductById(productId) {
         try {
-            const product = await Product.findById(productId);
+            const product = await Product.findByPk(productId);
             if (!product) {
                 throw new Error('Product not found');
             }
@@ -32,13 +32,11 @@ class ProductService {
 
     async updateProduct(productId, data) {
         try {
-            const product = await Product.findByIdAndUpdate(productId, data, {
-                new: true,
-                runValidators: true,
-            });
+            const product = await Product.findByPk(productId);
             if (!product) {
                 throw new Error('Product not found');
             }
+            await product.update(data);
             return product;
         } catch (error) {
             throw new Error('Error updating product: ' + error.message);
@@ -47,10 +45,11 @@ class ProductService {
 
     async deleteProduct(productId) {
         try {
-            const product = await Product.findByIdAndDelete(productId);
+            const product = await Product.findByPk(productId);
             if (!product) {
                 throw new Error('Product not found');
             }
+            await product.destroy();
             return product;
         } catch (error) {
             throw new Error('Error deleting product: ' + error.message);

@@ -2,21 +2,64 @@ const Order = require('../models/Order');
 const OrderItem = require('../models/orderItem');
 
 class OrderService {
+    // Get all orders
+    async getAllOrders() {
+        try {
+            const orders = await Order.findAll({
+                include: [OrderItem],
+            });
+            return orders;
+        } catch (error) {
+            throw new Error('Error fetching orders: ' + error.message);
+        }
+    }
+
+    // Get order by ID
+    async getOrderById(orderId) {
+        try {
+            const order = await Order.findByPk(orderId, {
+                include: [OrderItem],
+            });
+            if (!order) {
+                throw new Error('Order not found');
+            }
+            return order;
+        } catch (error) {
+            throw new Error('Error fetching order: ' + error.message);
+        }
+    }
+
     // Create a new order
     async createOrder(orderData, orderItems) {
         try {
             const order = await Order.create(orderData);
 
             // Add items to the order
-            const items = orderItems.map(item => ({
-                ...item,
-                orderId: order.id,
-            }));
-            await OrderItem.bulkCreate(items);
+            if (orderItems && orderItems.length > 0) {
+                const items = orderItems.map(item => ({
+                    ...item,
+                    orderId: order.id,
+                }));
+                await OrderItem.bulkCreate(items);
+            }
 
             return order;
         } catch (error) {
             throw new Error('Error creating order: ' + error.message);
+        }
+    }
+
+    // Update an order
+    async updateOrder(orderId, orderData) {
+        try {
+            const order = await Order.findByPk(orderId);
+            if (!order) {
+                throw new Error('Order not found');
+            }
+            await order.update(orderData);
+            return order;
+        } catch (error) {
+            throw new Error('Error updating order: ' + error.message);
         }
     }
 
