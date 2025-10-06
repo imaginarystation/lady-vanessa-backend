@@ -3,13 +3,13 @@
 ## Critical Bugs to Fix (Priority 1)
 
 ### 1. OrderService Missing Methods
-- [ ] Add `getAllOrders()` method to OrderService
-- [ ] Add `getOrderById()` method to OrderService (currently has `getOrderDetails()` which is similar)
-- [ ] Add `updateOrder()` method to OrderService (currently only has `updateOrderStatus()`)
-- [ ] Ensure OrderController properly calls the correct service methods
+- [x] Add `getAllOrders()` method to OrderService
+- [x] Add `getOrderById()` method to OrderService (currently has `getOrderDetails()` which is similar)
+- [x] Add `updateOrder()` method to OrderService (currently only has `updateOrderStatus()`)
+- [x] Ensure OrderController properly calls the correct service methods
 
 ### 2. ProductService ORM Inconsistency
-- [ ] Fix ProductService to use Sequelize methods instead of Mongoose
+- [x] Fix ProductService to use Sequelize methods instead of Mongoose
   - Replace `findById()` with `findByPk()`
   - Replace `save()` with Sequelize `create()`
   - Replace `findByIdAndUpdate()` with Sequelize `update()`
@@ -17,28 +17,28 @@
   - Replace `findAll()` with proper Sequelize query
 
 ### 3. OrderItemController and Routes Mismatch
-- [ ] Align OrderItemController method names with routes:
+- [x] Align OrderItemController method names with routes:
   - `addItemsToOrder()` (route expects this but controller has `createOrderItem()`)
   - `getItemsByOrderId()` (matches)
   - `updateOrderItem()` (matches)
   - `removeOrderItem()` (route expects this but controller has `deleteOrderItem()`)
-- [ ] Update OrderItemService to match expected functionality
+- [x] Update OrderItemService to match expected functionality
 
 ### 4. Order Creation Flow
-- [ ] Fix `createOrder()` in OrderController to accept orderItems
-- [ ] Ensure orderItems are properly passed to OrderService.createOrder()
+- [x] Fix `createOrder()` in OrderController to accept orderItems
+- [x] Ensure orderItems are properly passed to OrderService.createOrder()
 
 ## Feature Additions (Priority 2)
 
 ### 5. Admin Functionality
-- [ ] Create AdminController with CRUD operations
-- [ ] Create AdminService with business logic
-- [ ] Create admin routes (/api/admin)
-- [ ] Add admin login/authentication endpoint
+- [x] Create AdminController with CRUD operations
+- [x] Create AdminService with business logic
+- [x] Create admin routes (/api/admin)
+- [x] Add admin login/authentication endpoint
 - [ ] Add admin-specific operations (manage products, orders, users)
 
 ### 6. Authentication & Authorization
-- [ ] Create authentication middleware to verify JWT tokens
+- [x] Create authentication middleware to verify JWT tokens
 - [ ] Create authorization middleware to check user roles (user vs admin)
 - [ ] Protect routes that require authentication
 - [ ] Protect admin routes with admin-only middleware
@@ -47,7 +47,7 @@
 - [ ] Add user profile endpoints (GET, PUT /api/users/profile)
 - [ ] Add password change functionality
 - [ ] Add user order history endpoint
-- [ ] Fix user login to use Sequelize properly (currently uses Mongoose .findOne())
+- [x] Fix user login to use Sequelize properly (currently uses Mongoose .findOne())
 
 ### 8. Product Management Enhancements
 - [ ] Add product search functionality
@@ -123,8 +123,8 @@
 - [ ] Add npm scripts for common tasks
 
 ### 18. Environment Configuration
-- [ ] Document required environment variables
-- [ ] Add .env.example file
+- [x] Document required environment variables
+- [x] Add .env.example file
 - [ ] Add environment-specific configurations
 - [ ] Add configuration validation
 
