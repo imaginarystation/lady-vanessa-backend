@@ -4,7 +4,14 @@ class ProductController {
     // Get all products
     async getAllProducts(req, res) {
         try {
-            const products = await ProductService.getAllProducts();
+            const filters = {
+                category: req.query.category,
+                gender: req.query.gender,
+                status: req.query.status,
+                minPrice: req.query.minPrice,
+                maxPrice: req.query.maxPrice,
+            };
+            const products = await ProductService.getAllProducts(filters);
             res.status(200).json(products);
         } catch (error) {
             res.status(500).json({ message: 'Error fetching products', error });
@@ -21,6 +28,27 @@ class ProductController {
             res.status(200).json(product);
         } catch (error) {
             res.status(500).json({ message: 'Error fetching product', error });
+        }
+    }
+
+    // Search products
+    async searchProducts(req, res) {
+        try {
+            const query = req.query.q || '';
+            const products = await ProductService.searchProducts(query);
+            res.status(200).json(products);
+        } catch (error) {
+            res.status(500).json({ message: 'Error searching products', error });
+        }
+    }
+
+    // Get products by category
+    async getProductsByCategory(req, res) {
+        try {
+            const products = await ProductService.getProductsByCategory(req.params.category);
+            res.status(200).json(products);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching products by category', error });
         }
     }
 
