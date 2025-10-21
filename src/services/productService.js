@@ -22,11 +22,56 @@ class ProductService {
         }
     }
 
-    async getAllProducts() {
+    async getAllProducts(filters = {}) {
         try {
-            return await Product.findAll();
+            const where = {};
+            
+            if (filters.category) {
+                where.category = filters.category;
+            }
+            
+            if (filters.gender) {
+                where.gender = filters.gender;
+            }
+            
+            if (filters.status) {
+                where.status = filters.status;
+            }
+            
+            if (filters.minPrice || filters.maxPrice) {
+                where.price = {};
+                if (filters.minPrice) where.price.$gte = parseFloat(filters.minPrice);
+                if (filters.maxPrice) where.price.$lte = parseFloat(filters.maxPrice);
+            }
+            
+            return await Product.findAll({ where });
         } catch (error) {
             throw new Error('Error fetching products: ' + error.message);
+        }
+    }
+
+    async searchProducts(query) {
+        try {
+            const { Op } = require('sequelize');
+            return await Product.findAll({
+                where: {
+                    [Op.or]: [
+                        { name: { [Op.like]: `%${query}%` } },
+                        { description: { [Op.like]: `%${query}%` } },
+                        { category: { [Op.like]: `%${query}%` } }
+                    ]
+                }
+            });
+        } catch (error) {
+            throw new Error('Error searching products: ' + error.message);
+        }
+    }
+
+    async getProductsByCategory(category) {
+        try {
+            return await Product.findAll({ where: { category } });
+        } catch (error) {
+            throw new Error('Error fetching products by category: ' + error.message);
         }
     }
 

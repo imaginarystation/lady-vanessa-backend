@@ -23,6 +23,29 @@ const Product = sequelize.define('Product', {
         allowNull: false,
         defaultValue: 0,
     },
+    image: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    images: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: [],
+    },
+    tags: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: [],
+    },
+    gender: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'Active',
+    },
 }, {
     timestamps: true,
 });
