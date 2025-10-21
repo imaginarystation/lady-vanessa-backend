@@ -1,16 +1,13 @@
 const express = require('express');
 const bannerController = require('../controllers/bannerController');
-const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Public routes
+// All routes are public for now (can be protected later with authenticate middleware)
 router.get('/', bannerController.getAllBanners);
 router.get('/:id', bannerController.getBannerById);
-
-// Protected admin routes
-router.post('/', authenticate, bannerController.createBanner);
-router.put('/:id', authenticate, bannerController.updateBanner);
-router.delete('/:id', authenticate, bannerController.deleteBanner);
+router.post('/', bannerController.createBanner);
+router.put('/:id', bannerController.updateBanner);
+router.delete('/:id', bannerController.deleteBanner);
 
 module.exports = router;
