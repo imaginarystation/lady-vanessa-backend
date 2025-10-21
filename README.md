@@ -5,7 +5,12 @@ Backend API for Lady Vanessa E-commerce Platform
 ## Features
 
 - **User Management**: Registration, login with JWT authentication
-- **Product Management**: CRUD operations for products
+- **Product Management**: CRUD operations for products with filtering and search
+- **Category Management**: Organize products into categories
+- **Banner Management**: Manage promotional banners (image/video)
+- **Event Management**: Manage fashion shows and events
+- **Perfume Management**: Specialized perfume product catalog
+- **Gender Sections**: Gender-specific content sections for men/women
 - **Order Management**: Complete order lifecycle management
 - **Order Items**: Manage items within orders
 - **Admin Panel**: Admin authentication and management
@@ -128,11 +133,51 @@ When using Docker, you can set environment variables in `docker-compose.yml` or 
 - `POST /api/users/login` - User login
 
 ### Products
-- `GET /api/products` - Get all products
+- `GET /api/products` - Get all products (supports filters: category, gender, status, minPrice, maxPrice)
+- `GET /api/products/search?q=query` - Search products by name, description, or category
+- `GET /api/products/category/:category` - Get products by category
 - `GET /api/products/:id` - Get product by ID
 - `POST /api/products` - Create new product
 - `PUT /api/products/:id` - Update product
 - `DELETE /api/products/:id` - Delete product
+
+### Categories
+- `GET /api/categories` - Get all categories
+- `GET /api/categories/:id` - Get category by ID
+- `POST /api/categories` - Create new category
+- `PUT /api/categories/:id` - Update category
+- `DELETE /api/categories/:id` - Delete category
+
+### Banners
+- `GET /api/banners` - Get all banners
+- `GET /api/banners/:id` - Get banner by ID
+- `POST /api/banners` - Create new banner
+- `PUT /api/banners/:id` - Update banner
+- `DELETE /api/banners/:id` - Delete banner
+
+### Events
+- `GET /api/events` - Get all events
+- `GET /api/events/active` - Get currently active event
+- `GET /api/events/:id` - Get event by ID
+- `POST /api/events` - Create new event
+- `PUT /api/events/:id` - Update event
+- `DELETE /api/events/:id` - Delete event
+
+### Perfumes
+- `GET /api/perfumes` - Get all perfumes (supports filters: sectionTag, minPrice, maxPrice)
+- `GET /api/perfumes/search?q=query` - Search perfumes by name
+- `GET /api/perfumes/:id` - Get perfume by ID
+- `POST /api/perfumes` - Create new perfume
+- `PUT /api/perfumes/:id` - Update perfume
+- `DELETE /api/perfumes/:id` - Delete perfume
+
+### Gender Sections
+- `GET /api/gender-sections` - Get all gender sections
+- `GET /api/gender-sections/gender/:gender` - Get gender section by gender (men/women)
+- `GET /api/gender-sections/:id` - Get gender section by ID
+- `POST /api/gender-sections` - Create new gender section
+- `PUT /api/gender-sections/:id` - Update gender section
+- `DELETE /api/gender-sections/:id` - Delete gender section
 
 ### Orders
 - `GET /api/orders` - Get all orders
@@ -181,13 +226,21 @@ src/
 
 ## Recent Updates
 
-### Bug Fixes
+### New Features (Latest)
+- **Added Category Management**: Full CRUD operations for product categories
+- **Added Banner Management**: Support for image and video banners
+- **Added Event Management**: Fashion show and event management system
+- **Added Perfume Catalog**: Specialized perfume product management with filtering
+- **Added Gender Sections**: Gender-specific content sections (men/women)
+- **Enhanced Product Model**: Added image, images array, tags, gender, and status fields
+- **Product Search & Filtering**: Search products by name/description, filter by category, gender, price range
+- **Comprehensive Test Coverage**: 91 tests covering all new endpoints
+
+### Previous Updates
 - Fixed OrderService missing methods (getAllOrders, getOrderById, updateOrder)
 - Fixed ProductService ORM inconsistency (Mongoose → Sequelize)
 - Fixed OrderItemController/Route method name mismatch
 - Fixed UserController to use Sequelize properly
-
-### New Features
 - Added authentication middleware for JWT verification
 - Added complete Admin functionality (routes, controller, service)
 - Added orderItem routes to main application
