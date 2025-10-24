@@ -1,5 +1,4 @@
-const Order = require('../models/Order');
-const OrderItem = require('../models/orderItem');
+const { Order, OrderItem } = require('../models');
 
 class OrderService {
     // Get all orders
@@ -9,6 +8,32 @@ class OrderService {
                 include: [OrderItem],
             });
             return orders;
+        } catch (error) {
+            throw new Error('Error fetching orders: ' + error.message);
+        }
+    }
+
+    // Get all orders with pagination
+    async getAllOrdersPaginated(page = 1, limit = 20) {
+        try {
+            const offset = (page - 1) * limit;
+            const { count, rows } = await Order.findAndCountAll({
+                include: [{
+                    model: OrderItem,
+                    required: false
+                }],
+                limit: parseInt(limit),
+                offset: parseInt(offset),
+                order: [['createdAt', 'DESC']],
+                distinct: true
+            });
+            
+            return {
+                data: rows,
+                total: count,
+                page: parseInt(page),
+                limit: parseInt(limit)
+            };
         } catch (error) {
             throw new Error('Error fetching orders: ' + error.message);
         }
