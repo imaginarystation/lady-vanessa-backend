@@ -11,6 +11,7 @@ const bannerRoutes = require('./routes/bannerRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const perfumeRoutes = require('./routes/perfumeRoutes');
 const genderSectionRoutes = require('./routes/genderSectionRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
 app.use(cors());
@@ -30,5 +31,6 @@ app.use('/api/banners', bannerRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/perfumes', perfumeRoutes);
 app.use('/api/gender-sections', genderSectionRoutes);
+app.use('/api/upload', uploadRoutes);
 
 module.exports = app;
