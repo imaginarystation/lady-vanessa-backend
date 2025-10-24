@@ -15,6 +15,7 @@ Backend API for Lady Vanessa E-commerce Platform
 - **Order Items**: Manage items within orders
 - **Admin Panel**: Admin authentication and management
 - **Authentication**: JWT-based authentication middleware
+- **File Upload**: Cloud-based image storage with Cloudinary integration
 
 ## Tech Stack
 
@@ -22,6 +23,9 @@ Backend API for Lady Vanessa E-commerce Platform
 - **PostgreSQL** database with Sequelize ORM
 - **JWT** for authentication
 - **bcrypt** for password hashing
+- **Cloudinary** for cloud-based image storage
+- **Multer** for file upload handling
+- **Sharp** for image optimization
 
 ## Getting Started
 
@@ -126,6 +130,120 @@ When using Docker, you can set environment variables in `docker-compose.yml` or 
 - **Exposed Port**: 5000
 
 
+## File Upload & Storage
+
+The application uses **Cloudinary** for cloud-based image storage, providing scalable, reliable, and CDN-backed file storage for all media assets.
+
+### Setup Cloudinary
+
+1. Sign up for a free account at [Cloudinary](https://cloudinary.com)
+2. Get your credentials from the Cloudinary dashboard
+3. Add them to your `.env` file:
+
+```env
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+MAX_FILE_SIZE=5242880  # 5MB in bytes
+```
+
+### Upload Features
+
+- **Supported Formats**: JPEG, PNG, GIF, WebP
+- **File Size Limit**: Configurable (default 5MB)
+- **Automatic Optimization**: Images are automatically optimized for web delivery
+- **Image Transformations**: Support for resizing, cropping, and format conversion
+- **Multiple Uploads**: Products can have up to 5 images
+- **Organized Storage**: Files are organized in folders by entity type (products, users, banners, etc.)
+
+### Upload API Examples
+
+#### Upload Single Image
+
+```bash
+# Upload product image
+curl -X POST http://localhost:5000/api/upload/product \
+  -F "image=@/path/to/image.jpg"
+
+# Upload user profile picture
+curl -X POST http://localhost:5000/api/upload/user \
+  -F "profilePicture=@/path/to/profile.jpg"
+```
+
+Response:
+```json
+{
+  "success": true,
+  "message": "File uploaded successfully",
+  "data": {
+    "url": "https://res.cloudinary.com/your-cloud/image/upload/v1234567890/lady-vanessa/products/abc123.jpg",
+    "filename": "abc123",
+    "size": 245678
+  }
+}
+```
+
+#### Upload Multiple Product Images
+
+```bash
+curl -X POST http://localhost:5000/api/upload/product-images \
+  -F "images=@/path/to/image1.jpg" \
+  -F "images=@/path/to/image2.jpg" \
+  -F "images=@/path/to/image3.jpg"
+```
+
+#### Delete Image
+
+```bash
+curl -X DELETE http://localhost:5000/api/upload \
+  -H "Content-Type: application/json" \
+  -d '{"imageUrl": "https://res.cloudinary.com/your-cloud/image/upload/v1234567890/sample.jpg"}'
+```
+
+#### Delete Multiple Images
+
+```bash
+curl -X DELETE http://localhost:5000/api/upload/multiple \
+  -H "Content-Type: application/json" \
+  -d '{"imageUrls": ["https://...", "https://..."]}'
+```
+
+### Image Optimization
+
+The `UploadService` provides utility methods for getting optimized image URLs:
+
+```javascript
+const UploadService = require('./services/uploadService');
+
+// Get optimized image URL with custom dimensions
+const optimizedUrl = UploadService.getOptimizedImageUrl(originalUrl, {
+  width: 500,
+  height: 500,
+  crop: 'fill',
+  quality: 'auto',
+  format: 'auto'
+});
+```
+
+### Supported Upload Types
+
+- `product` - Product main image
+- `user` - User profile picture
+- `banner` - Banner image
+- `perfume` - Perfume product image
+- `category` - Category image
+- `event` - Event image
+- `gender-section` - Gender section image
+
+### Security & Validation
+
+- File type validation (only images allowed)
+- File size limits enforced
+- Secure Cloudinary signed uploads
+- Public ID extraction for secure deletion
+- Error handling for failed uploads/deletions
+
+
 ## API Endpoints
 
 ### Users
@@ -200,6 +318,12 @@ When using Docker, you can set environment variables in `docker-compose.yml` or 
 - `PUT /api/admin/:id` - Update admin (protected)
 - `DELETE /api/admin/:id` - Delete admin (protected)
 
+### File Upload
+- `POST /api/upload/:type` - Upload single image (type: product, user, banner, perfume, category, event, gender-section)
+- `POST /api/upload/product-images` - Upload multiple product images (max 5)
+- `DELETE /api/upload` - Delete single image (body: { imageUrl })
+- `DELETE /api/upload/multiple` - Delete multiple images (body: { imageUrls: [] })
+
 ## Environment Variables
 
 See `.env.example` for required environment variables:
@@ -208,6 +332,10 @@ See `.env.example` for required environment variables:
 - `PORT` - Server port (default: 5000)
 - `JWT_SECRET` - Secret key for JWT token generation
 - `NODE_ENV` - Environment (development/production)
+- `CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name for image storage
+- `CLOUDINARY_API_KEY` - Cloudinary API key
+- `CLOUDINARY_API_SECRET` - Cloudinary API secret
+- `MAX_FILE_SIZE` - Maximum file upload size in bytes (default: 5242880 = 5MB)
 
 ## Project Structure
 
@@ -227,6 +355,12 @@ src/
 ## Recent Updates
 
 ### New Features (Latest)
+- **Cloud-Based File Upload System**: Integrated Cloudinary for scalable image storage
+  - Support for uploading profile pictures, product images, banners, and other media
+  - Automatic image optimization and transformation
+  - Multiple image upload support for products (up to 5 images)
+  - Secure file handling with type validation and size limits
+  - RESTful API endpoints for upload and deletion operations
 - **Added Category Management**: Full CRUD operations for product categories
 - **Added Banner Management**: Support for image and video banners
 - **Added Event Management**: Fashion show and event management system
@@ -234,7 +368,7 @@ src/
 - **Added Gender Sections**: Gender-specific content sections (men/women)
 - **Enhanced Product Model**: Added image, images array, tags, gender, and status fields
 - **Product Search & Filtering**: Search products by name/description, filter by category, gender, price range
-- **Comprehensive Test Coverage**: 91 tests covering all new endpoints
+- **Comprehensive Test Coverage**: 120 tests covering all endpoints including file uploads
 
 ### Previous Updates
 - Fixed OrderService missing methods (getAllOrders, getOrderById, updateOrder)
