@@ -20,7 +20,10 @@ router.put('/orders/:id', authenticate, adminController.updateOrder);
 
 // Admin User Management routes
 router.get('/users', authenticate, adminController.getUsers);
+router.post('/users', authenticate, adminController.createUser);
 router.get('/users/:id', authenticate, adminController.getUserById);
+router.put('/users/:id', authenticate, adminController.updateUser);
+router.delete('/users/:id', authenticate, adminController.deleteUser);
 
 // Protected admin routes (must come after specific routes)
 router.get('/', authenticate, adminController.getAllAdmins);

@@ -193,6 +193,33 @@ class AdminController {
             res.status(404).json({ message: 'User not found', error });
         }
     }
+
+    async createUser(req, res) {
+        try {
+            const newUser = await UserService.createUser(req.body);
+            res.status(201).json(newUser);
+        } catch (error) {
+            res.status(500).json({ message: 'Error creating user', error });
+        }
+    }
+
+    async updateUser(req, res) {
+        try {
+            const updatedUser = await UserService.updateUser(req.params.id, req.body);
+            res.status(200).json(updatedUser);
+        } catch (error) {
+            res.status(500).json({ message: 'Error updating user', error });
+        }
+    }
+
+    async deleteUser(req, res) {
+        try {
+            const result = await UserService.deleteUser(req.params.id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Error deleting user', error });
+        }
+    }
 }
 
 module.exports = new AdminController();

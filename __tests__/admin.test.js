@@ -617,5 +617,134 @@ describe('Admin Endpoints', () => {
                 expect(response.body).not.toHaveProperty('password');
             });
         });
+
+        describe('POST /api/admin/users', () => {
+            it('should create a new user', async () => {
+                const userData = {
+                    name: 'New User',
+                    email: 'newuser@example.com',
+                    password: 'password123'
+                };
+
+                const response = await request(app)
+                    .post('/api/admin/users')
+                    .set('Authorization', `Bearer ${adminToken}`)
+                    .send(userData)
+                    .expect(201);
+
+                expect(response.body).toHaveProperty('name', userData.name);
+                expect(response.body).toHaveProperty('email', userData.email);
+                expect(response.body).not.toHaveProperty('password');
+                expect(response.body).toHaveProperty('id');
+            });
+
+            it('should return error when required fields are missing', async () => {
+                const userData = {
+                    name: 'New User'
+                    // Missing email and password
+                };
+
+                const response = await request(app)
+                    .post('/api/admin/users')
+                    .set('Authorization', `Bearer ${adminToken}`)
+                    .send(userData)
+                    .expect(500);
+
+                expect(response.body).toHaveProperty('message');
+            });
+        });
+
+        describe('PUT /api/admin/users/:id', () => {
+            it('should update a user', async () => {
+                const user = await User.create({
+                    name: 'Original Name',
+                    email: 'original@example.com',
+                    password: 'password'
+                });
+
+                const updateData = {
+                    name: 'Updated Name',
+                    email: 'updated@example.com'
+                };
+
+                const response = await request(app)
+                    .put(`/api/admin/users/${user.id}`)
+                    .set('Authorization', `Bearer ${adminToken}`)
+                    .send(updateData)
+                    .expect(200);
+
+                expect(response.body).toHaveProperty('name', updateData.name);
+                expect(response.body).toHaveProperty('email', updateData.email);
+                expect(response.body).not.toHaveProperty('password');
+            });
+
+            it('should update user password', async () => {
+                const user = await User.create({
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    password: 'oldpassword'
+                });
+
+                const updateData = {
+                    password: 'newpassword123'
+                };
+
+                const response = await request(app)
+                    .put(`/api/admin/users/${user.id}`)
+                    .set('Authorization', `Bearer ${adminToken}`)
+                    .send(updateData)
+                    .expect(200);
+
+                expect(response.body).not.toHaveProperty('password');
+                
+                // Verify password was actually updated by checking the database
+                const updatedUser = await User.findByPk(user.id);
+                expect(updatedUser.password).not.toBe('oldpassword');
+            });
+
+            it('should return error for non-existent user', async () => {
+                const updateData = {
+                    name: 'Updated Name'
+                };
+
+                const response = await request(app)
+                    .put('/api/admin/users/99999')
+                    .set('Authorization', `Bearer ${adminToken}`)
+                    .send(updateData)
+                    .expect(500);
+
+                expect(response.body).toHaveProperty('message');
+            });
+        });
+
+        describe('DELETE /api/admin/users/:id', () => {
+            it('should delete a user', async () => {
+                const user = await User.create({
+                    name: 'User to Delete',
+                    email: 'delete@example.com',
+                    password: 'password'
+                });
+
+                const response = await request(app)
+                    .delete(`/api/admin/users/${user.id}`)
+                    .set('Authorization', `Bearer ${adminToken}`)
+                    .expect(200);
+
+                expect(response.body).toHaveProperty('message', 'User deleted successfully');
+
+                // Verify user is deleted
+                const deletedUser = await User.findByPk(user.id);
+                expect(deletedUser).toBeNull();
+            });
+
+            it('should return error for non-existent user', async () => {
+                const response = await request(app)
+                    .delete('/api/admin/users/99999')
+                    .set('Authorization', `Bearer ${adminToken}`)
+                    .expect(500);
+
+                expect(response.body).toHaveProperty('message');
+            });
+        });
     });
 });
