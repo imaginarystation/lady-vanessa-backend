@@ -8,7 +8,21 @@ const router = express.Router();
 router.post('/login', adminController.login);
 router.post('/register', adminController.register);
 
-// Protected routes (require authentication)
+// Admin Product Management routes (must come before /:id routes)
+router.get('/products', authenticate, adminController.getProducts);
+router.post('/products', authenticate, adminController.createProduct);
+router.put('/products/:id', authenticate, adminController.updateProduct);
+router.delete('/products/:id', authenticate, adminController.deleteProduct);
+
+// Admin Order Management routes
+router.get('/orders', authenticate, adminController.getOrders);
+router.put('/orders/:id', authenticate, adminController.updateOrder);
+
+// Admin User Management routes
+router.get('/users', authenticate, adminController.getUsers);
+router.get('/users/:id', authenticate, adminController.getUserById);
+
+// Protected admin routes (must come after specific routes)
 router.get('/', authenticate, adminController.getAllAdmins);
 router.get('/:id', authenticate, adminController.getAdminById);
 router.put('/:id', authenticate, adminController.updateAdmin);

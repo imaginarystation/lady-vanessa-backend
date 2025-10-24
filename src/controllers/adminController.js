@@ -1,6 +1,9 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const AdminService = require('../services/adminService');
+const ProductService = require('../services/productService');
+const OrderService = require('../services/orderService');
+const UserService = require('../services/userService');
 
 class AdminController {
     // Admin login
@@ -100,6 +103,94 @@ class AdminController {
             res.status(200).json(result);
         } catch (error) {
             res.status(500).json({ message: 'Error deleting admin', error });
+        }
+    }
+
+    // Admin Product Management
+    async getProducts(req, res) {
+        try {
+            const page = req.query.page || 1;
+            const limit = req.query.limit || 20;
+            const filters = {
+                category: req.query.category,
+                gender: req.query.gender,
+                status: req.query.status,
+                minPrice: req.query.minPrice,
+                maxPrice: req.query.maxPrice,
+            };
+            const result = await ProductService.getAllProductsPaginated(page, limit, filters);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching products', error });
+        }
+    }
+
+    async createProduct(req, res) {
+        try {
+            const newProduct = await ProductService.createProduct(req.body);
+            res.status(201).json(newProduct);
+        } catch (error) {
+            res.status(500).json({ message: 'Error creating product', error });
+        }
+    }
+
+    async updateProduct(req, res) {
+        try {
+            const updatedProduct = await ProductService.updateProduct(req.params.id, req.body);
+            res.status(200).json(updatedProduct);
+        } catch (error) {
+            res.status(500).json({ message: 'Error updating product', error });
+        }
+    }
+
+    async deleteProduct(req, res) {
+        try {
+            await ProductService.deleteProduct(req.params.id);
+            res.status(200).json({ message: 'Product deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Error deleting product', error });
+        }
+    }
+
+    // Admin Order Management
+    async getOrders(req, res) {
+        try {
+            const page = req.query.page || 1;
+            const limit = req.query.limit || 20;
+            const result = await OrderService.getAllOrdersPaginated(page, limit);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching orders', error });
+        }
+    }
+
+    async updateOrder(req, res) {
+        try {
+            const updatedOrder = await OrderService.updateOrder(req.params.id, req.body);
+            res.status(200).json(updatedOrder);
+        } catch (error) {
+            res.status(500).json({ message: 'Error updating order', error });
+        }
+    }
+
+    // Admin User Management
+    async getUsers(req, res) {
+        try {
+            const page = req.query.page || 1;
+            const limit = req.query.limit || 20;
+            const result = await UserService.getAllUsers(page, limit);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching users', error });
+        }
+    }
+
+    async getUserById(req, res) {
+        try {
+            const user = await UserService.getUserById(req.params.id);
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(404).json({ message: 'User not found', error });
         }
     }
 }
