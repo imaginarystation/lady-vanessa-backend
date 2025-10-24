@@ -50,6 +50,47 @@ class ProductService {
         }
     }
 
+    async getAllProductsPaginated(page = 1, limit = 20, filters = {}) {
+        try {
+            const where = {};
+            
+            if (filters.category) {
+                where.category = filters.category;
+            }
+            
+            if (filters.gender) {
+                where.gender = filters.gender;
+            }
+            
+            if (filters.status) {
+                where.status = filters.status;
+            }
+            
+            if (filters.minPrice || filters.maxPrice) {
+                where.price = {};
+                if (filters.minPrice) where.price.$gte = parseFloat(filters.minPrice);
+                if (filters.maxPrice) where.price.$lte = parseFloat(filters.maxPrice);
+            }
+            
+            const offset = (page - 1) * limit;
+            const { count, rows } = await Product.findAndCountAll({
+                where,
+                limit: parseInt(limit),
+                offset: parseInt(offset),
+                order: [['createdAt', 'DESC']]
+            });
+            
+            return {
+                data: rows,
+                total: count,
+                page: parseInt(page),
+                limit: parseInt(limit)
+            };
+        } catch (error) {
+            throw new Error('Error fetching products: ' + error.message);
+        }
+    }
+
     async searchProducts(query) {
         try {
             const { Op } = require('sequelize');
