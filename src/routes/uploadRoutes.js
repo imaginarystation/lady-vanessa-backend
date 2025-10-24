@@ -11,24 +11,36 @@ const UploadService = require('../services/uploadService');
 router.post('/:type', (req, res, next) => {
     const { type } = req.params;
     
-    // Map type to middleware
-    const middlewareMap = {
-        'product': uploadMiddleware.product,
-        'user': uploadMiddleware.userProfile,
-        'banner': uploadMiddleware.banner,
-        'perfume': uploadMiddleware.perfume,
-        'category': uploadMiddleware.category,
-        'event': uploadMiddleware.event,
-        'gender-section': uploadMiddleware.genderSection,
-    };
-
-    const middleware = middlewareMap[type];
+    // Determine middleware based on type (whitelist approach for security)
+    let middleware;
     
-    if (!middleware) {
-        return res.status(400).json({ 
-            success: false, 
-            message: `Invalid upload type: ${type}` 
-        });
+    switch(type) {
+        case 'product':
+            middleware = uploadMiddleware.product;
+            break;
+        case 'user':
+            middleware = uploadMiddleware.userProfile;
+            break;
+        case 'banner':
+            middleware = uploadMiddleware.banner;
+            break;
+        case 'perfume':
+            middleware = uploadMiddleware.perfume;
+            break;
+        case 'category':
+            middleware = uploadMiddleware.category;
+            break;
+        case 'event':
+            middleware = uploadMiddleware.event;
+            break;
+        case 'gender-section':
+            middleware = uploadMiddleware.genderSection;
+            break;
+        default:
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid upload type: ${type}` 
+            });
     }
 
     // Apply middleware

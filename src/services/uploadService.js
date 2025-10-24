@@ -54,9 +54,29 @@ class UploadService {
         }
 
         try {
+            // Validate that this is a Cloudinary URL
+            const cloudinaryPattern = /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//;
+            if (!cloudinaryPattern.test(imageUrl)) {
+                return null;
+            }
+
             // Match pattern: .../upload/v{version}/{folder}/{public_id}.{format}
-            const matches = imageUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
-            return matches ? matches[1] : null;
+            // Using a safer, non-backtracking regex
+            const urlParts = imageUrl.split('/upload/');
+            if (urlParts.length !== 2) {
+                return null;
+            }
+            
+            const afterUpload = urlParts[1];
+            // Remove optional version prefix (v123456/)
+            const withoutVersion = afterUpload.replace(/^v\d+\//, '');
+            // Remove file extension
+            const lastDotIndex = withoutVersion.lastIndexOf('.');
+            if (lastDotIndex === -1) {
+                return null;
+            }
+            
+            return withoutVersion.substring(0, lastDotIndex);
         } catch (error) {
             console.error('Error extracting public_id:', error);
             return null;
@@ -70,7 +90,13 @@ class UploadService {
      * @returns {string} - The transformed image URL
      */
     static getOptimizedImageUrl(imageUrl, options = {}) {
-        if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+        // Validate that this is a Cloudinary URL
+        if (!imageUrl || typeof imageUrl !== 'string') {
+            return imageUrl;
+        }
+
+        const cloudinaryPattern = /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//;
+        if (!cloudinaryPattern.test(imageUrl)) {
             return imageUrl;
         }
 
