@@ -101,7 +101,69 @@ class AdminController {
         } catch (error) {
             res.status(500).json({ message: 'Error deleting admin', error });
         }
+        // Handle users
+    }
+    // Get all users
+    async getAllUsers(req, res) {
+        try {
+            const users = await AdminService.getAllUsers();
+            res.status(200).json(users);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching users', error });
+        }
+    }
+
+    // Get user by ID
+    async getUserById(req, res) {
+        const { userId } = req.params;
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        try {
+            const user = await AdminService.getUserById(userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching user', error });
+        }
+    }
+
+    // Update a user
+    async updateUser(req, res) {
+        const { userId } = req.params;
+        const data = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        try {
+            const updatedUser = await AdminService.updateUser(userId, data);
+            res.status(200).json(updatedUser);
+        } catch (error) {
+            res.status(500).json({ message: 'Error updating user', error });
+        }
+    }
+
+    // Delete a user
+    async deleteUser(req, res) {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        try {
+            const deleteResult = await AdminService.deleteUser(userId);
+            res.status(200).json(deleteResult);
+        } catch (error) {
+            res.status(500).json({ message: 'Error deleting user', error });
+        }
     }
 }
+
 
 module.exports = new AdminController();

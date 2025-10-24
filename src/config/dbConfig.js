@@ -15,6 +15,9 @@ const { DB_URL } = process.env;
 const sequelize = new Sequelize(DB_URL, {
     url: DB_URL,
   dialect: 'postgres',
+  define: {
+    schema: 'public', // Specify the default schema here
+  },
     // logging: false, // Disable logging; default: console.logr
 });
 
