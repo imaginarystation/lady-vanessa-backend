@@ -1,4 +1,4 @@
-const stripe = process.env.STRIPE_SECRET_KEY 
+const stripe = (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.trim())
     ? require('stripe')(process.env.STRIPE_SECRET_KEY)
     : null;
 const { Order } = require('../models');
@@ -184,8 +184,12 @@ class PaymentService {
 
     /**
      * Process webhook events from Stripe
-     * @param {object} event - The Stripe webhook event
-     * @returns {object} Processing result
+     * @param {object} event - The Stripe webhook event object containing type and data
+     * @param {string} event.type - The type of event (e.g., 'payment_intent.succeeded')
+     * @param {object} event.data - The event data object
+     * @param {object} event.data.object - The Stripe object (e.g., payment intent)
+     * @returns {Promise<object>} Processing result with processed status, orderId, and eventType
+     * @throws {Error} If there's an error processing the webhook
      */
     async handleWebhook(event) {
         try {
