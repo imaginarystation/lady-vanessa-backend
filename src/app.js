@@ -12,9 +12,14 @@ const eventRoutes = require('./routes/eventRoutes');
 const perfumeRoutes = require('./routes/perfumeRoutes');
 const genderSectionRoutes = require('./routes/genderSectionRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 app.use(cors());
+
+// Raw body parsing for Stripe webhooks (must be before bodyParser.json())
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
 app.use(bodyParser.json());
 
 // Routes
@@ -32,5 +37,6 @@ app.use('/api/events', eventRoutes);
 app.use('/api/perfumes', perfumeRoutes);
 app.use('/api/gender-sections', genderSectionRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/payments', paymentRoutes);
 
 module.exports = app;
