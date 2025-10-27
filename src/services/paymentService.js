@@ -1,7 +1,19 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY 
+    ? require('stripe')(process.env.STRIPE_SECRET_KEY)
+    : null;
 const { Order } = require('../models');
 
 class PaymentService {
+    /**
+     * Ensure Stripe is configured
+     * @private
+     */
+    _ensureStripeConfigured() {
+        if (!stripe) {
+            throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+        }
+    }
+
     /**
      * Create a payment intent for an order
      * @param {number} orderId - The ID of the order
@@ -9,6 +21,8 @@ class PaymentService {
      * @returns {object} Payment intent details
      */
     async createPaymentIntent(orderId, paymentData = {}) {
+        this._ensureStripeConfigured();
+        
         try {
             // Get the order
             const order = await Order.findByPk(orderId);
@@ -62,6 +76,8 @@ class PaymentService {
      * @returns {object} Confirmed payment intent
      */
     async confirmPayment(paymentIntentId, paymentMethodId = null) {
+        this._ensureStripeConfigured();
+        
         try {
             const params = {};
             if (paymentMethodId) {
@@ -97,6 +113,8 @@ class PaymentService {
      * @returns {object} Payment status details
      */
     async getPaymentStatus(orderId) {
+        this._ensureStripeConfigured();
+        
         try {
             const order = await Order.findByPk(orderId);
             if (!order) {
@@ -139,6 +157,8 @@ class PaymentService {
      * @returns {object} Cancelled payment intent
      */
     async cancelPayment(orderId) {
+        this._ensureStripeConfigured();
+        
         try {
             const order = await Order.findByPk(orderId);
             if (!order) {
@@ -230,6 +250,8 @@ class PaymentService {
      * @returns {object} The verified event
      */
     constructWebhookEvent(payload, signature) {
+        this._ensureStripeConfigured();
+        
         try {
             const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
             if (!webhookSecret) {
@@ -253,6 +275,8 @@ class PaymentService {
      * @returns {object} Refund details
      */
     async refundPayment(orderId, amount = null) {
+        this._ensureStripeConfigured();
+        
         try {
             const order = await Order.findByPk(orderId);
             if (!order) {
