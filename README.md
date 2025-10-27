@@ -244,6 +244,173 @@ const optimizedUrl = UploadService.getOptimizedImageUrl(originalUrl, {
 - Error handling for failed uploads/deletions
 
 
+## Payment Integration
+
+The application uses **Stripe** for secure payment processing, providing industry-standard payment capabilities with comprehensive testing support.
+
+### Setup Stripe
+
+1. Sign up for a free account at [Stripe](https://stripe.com)
+2. Get your test API keys from the Stripe dashboard
+3. Add them to your `.env` file:
+
+```env
+STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-publishable-key
+STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+```
+
+**Note**: Always use test keys (starting with `sk_test_` and `pk_test_`) during development.
+
+### Payment Features
+
+- **Payment Intent Creation**: Secure payment intent creation for orders
+- **Payment Confirmation**: Confirm payments with Stripe payment methods
+- **Payment Status Tracking**: Real-time payment status updates
+- **Webhook Support**: Automatic order status updates via Stripe webhooks
+- **Refunds**: Full and partial refund support
+- **Cancellation**: Cancel pending payments
+- **Secure Processing**: All payments processed through Stripe's secure infrastructure
+
+### Payment Workflow
+
+1. **Create Order**: First create an order using the orders API
+2. **Create Payment Intent**: Call `/api/payments/create-intent` with the order ID
+3. **Client-Side Payment**: Use the returned `clientSecret` with Stripe.js on the frontend
+4. **Webhook Updates**: Stripe sends webhook events to update order status automatically
+5. **Payment Status**: Query `/api/payments/status/:orderId` to check payment status
+
+### Payment API Examples
+
+#### Create Payment Intent
+
+```bash
+curl -X POST http://localhost:5000/api/payments/create-intent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 123,
+    "currency": "usd"
+  }'
+```
+
+Response:
+```json
+{
+  "success": true,
+  "message": "Payment intent created successfully",
+  "data": {
+    "clientSecret": "pi_xxxxx_secret_xxxxx",
+    "paymentIntentId": "pi_xxxxx",
+    "amount": 99.99,
+    "currency": "usd"
+  }
+}
+```
+
+#### Confirm Payment
+
+```bash
+curl -X POST http://localhost:5000/api/payments/confirm \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paymentIntentId": "pi_xxxxx",
+    "paymentMethodId": "pm_xxxxx"
+  }'
+```
+
+#### Get Payment Status
+
+```bash
+curl http://localhost:5000/api/payments/status/123
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "orderId": 123,
+    "paymentIntentId": "pi_xxxxx",
+    "status": "succeeded",
+    "amount": 99.99,
+    "currency": "usd",
+    "paymentMethod": "pm_xxxxx"
+  }
+}
+```
+
+#### Cancel Payment
+
+```bash
+curl -X POST http://localhost:5000/api/payments/cancel \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 123
+  }'
+```
+
+#### Refund Payment
+
+```bash
+# Full refund
+curl -X POST http://localhost:5000/api/payments/refund \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 123
+  }'
+
+# Partial refund
+curl -X POST http://localhost:5000/api/payments/refund \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 123,
+    "amount": 50.00
+  }'
+```
+
+### Webhook Configuration
+
+To receive automatic payment status updates:
+
+1. **Install Stripe CLI** for local testing:
+   ```bash
+   # Install Stripe CLI
+   stripe login
+   
+   # Forward webhooks to local server
+   stripe listen --forward-to localhost:5000/api/payments/webhook
+   ```
+
+2. **Production Setup**: In the Stripe Dashboard, add your webhook endpoint:
+   - Endpoint URL: `https://yourdomain.com/api/payments/webhook`
+   - Events to listen for:
+     - `payment_intent.succeeded`
+     - `payment_intent.payment_failed`
+     - `payment_intent.canceled`
+     - `payment_intent.processing`
+
+3. Copy the webhook signing secret to your `.env` file as `STRIPE_WEBHOOK_SECRET`
+
+### Order Payment Fields
+
+The Order model includes the following payment-related fields:
+
+- `paymentIntentId` - Stripe payment intent ID
+- `paymentStatus` - Current payment status (pending, succeeded, failed, canceled, refunded)
+- `paymentMethod` - Stripe payment method ID
+- `status` - Order status (automatically updated based on payment events)
+
+### Testing Payments
+
+Use Stripe's test card numbers for testing:
+
+- **Success**: `4242 4242 4242 4242`
+- **Decline**: `4000 0000 0000 0002`
+- **Requires Authentication**: `4000 0025 0000 3155`
+
+Use any future expiry date, any 3-digit CVC, and any postal code.
+
+
 ## API Endpoints
 
 ### Users
@@ -310,6 +477,19 @@ const optimizedUrl = UploadService.getOptimizedImageUrl(originalUrl, {
 - `PUT /api/orders/items/:id` - Update order item
 - `DELETE /api/orders/items/:id` - Remove order item
 
+### Payments (Stripe Integration)
+- `POST /api/payments/create-intent` - Create payment intent for an order
+  - Body: `{ orderId, currency?, metadata? }`
+  - Returns client secret for Stripe.js
+- `POST /api/payments/confirm` - Confirm a payment
+  - Body: `{ paymentIntentId, paymentMethodId? }`
+- `GET /api/payments/status/:orderId` - Get payment status for an order
+- `POST /api/payments/cancel` - Cancel a payment
+  - Body: `{ orderId }`
+- `POST /api/payments/refund` - Refund a payment
+  - Body: `{ orderId, amount? }`
+- `POST /api/payments/webhook` - Stripe webhook endpoint for payment events
+
 ### Admin
 - `POST /api/admin/register` - Register new admin
 - `POST /api/admin/login` - Admin login
@@ -336,6 +516,9 @@ See `.env.example` for required environment variables:
 - `CLOUDINARY_API_KEY` - Cloudinary API key
 - `CLOUDINARY_API_SECRET` - Cloudinary API secret
 - `MAX_FILE_SIZE` - Maximum file upload size in bytes (default: 5242880 = 5MB)
+- `STRIPE_SECRET_KEY` - Stripe secret key for payment processing (use test keys for development: sk_test_...)
+- `STRIPE_PUBLISHABLE_KEY` - Stripe publishable key (use test keys for development: pk_test_...)
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook secret for verifying webhook signatures
 
 ## Project Structure
 
@@ -355,6 +538,13 @@ src/
 ## Recent Updates
 
 ### New Features (Latest)
+- **Payment Processing Integration**: Complete Stripe payment integration
+  - Secure payment intent creation and confirmation
+  - Real-time payment status tracking via webhooks
+  - Support for refunds and payment cancellations
+  - Comprehensive payment API with 14 test cases
+  - Order model extended with payment tracking fields
+  - Test mode support for safe development
 - **Cloud-Based File Upload System**: Integrated Cloudinary for scalable image storage
   - Support for uploading profile pictures, product images, banners, and other media
   - Automatic image optimization and transformation
@@ -368,7 +558,7 @@ src/
 - **Added Gender Sections**: Gender-specific content sections (men/women)
 - **Enhanced Product Model**: Added image, images array, tags, gender, and status fields
 - **Product Search & Filtering**: Search products by name/description, filter by category, gender, price range
-- **Comprehensive Test Coverage**: 120 tests covering all endpoints including file uploads
+- **Comprehensive Test Coverage**: 134 tests covering all endpoints including payments
 
 ### Previous Updates
 - Fixed OrderService missing methods (getAllOrders, getOrderById, updateOrder)
